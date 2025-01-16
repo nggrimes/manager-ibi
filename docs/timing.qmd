@@ -1,0 +1,63 @@
+---
+title: Timing
+subtitle: Working Paper Draft *Not For Circulation*
+author:
+  - name: Nathaniel Grimes
+    email: nggrimes@ucsb.edu
+    affiliations: 
+        - id: ucsb
+          name: University of California, Santa Barbara
+          department: Bren School of Environmental Science and Management
+          address: Street Address
+          city: Santa Barbara
+          state: California
+    attributes:
+        corresponding: true
+abstract: |
+  Managers have to balance the needs of fishers with the long term sustainability of fish stocks. Index insurance is a new financial tool that could help managers meet these goals. This paper examines how index insurance could change the optimal harvest control rule for a fishery. The model is a stochastic dynamic programming model that considers both a growth and harvest shock. The model is solved using Value Function Iteration. Preliminary results show that index insurance reduces the optimal harvest control rule at all levels of biomass. Future steps include expanding the model to include basis risk, robustness checks, and simulating the stock and fisher benefits with the new policy function.
+keywords: 
+  - Index Insurance
+  - Mangement
+  - Fisheries
+  - Conservation
+  - Harvest Control Rules
+date: last-modified
+bibliography: library.bib
+csl: fish-and-fisheries.csl
+toc: true
+number-sections: true
+format:
+  pdf:
+    keep-tex: true
+    include-in-header:
+      text: |
+        \usepackage{cancel}
+        \addtokomafont{disposition}{\rmfamily}
+        \usepackage{tikz}
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+\usetikzlibrary{positioning}
+\begin{figure}
+    \begin{tikzpicture}
+        % draw horizontal line   
+        \draw (-8,0) -- (8,0);
+    \foreach \x in {-6,-4,-2,0,2,4}
+    \draw (\x cm,3pt) -- (\x cm,-3pt);
+    \foreach \y in {-8,7}
+    \draw (\y cm,8pt) -- (\y cm,-8pt);
+    \draw (-8,0) node[below=3pt] {$ t_0 $} node[above=3pt] {$  $};
+    \draw (-6,0) node[above=16pt] {$b_t$ known};
+    \draw (-4,0) node[above=3pt] {$f_t$ chosen};
+    \draw (-2,0) node[above=16pt] {$\omega_t$ revealed};
+    \draw (0,0) node[above=3pt] {$h_t$ realized};
+    \draw (2,0) node[above=16pt] {$I(\theta)$ paid};
+    \draw (4,0)  node[above=3pt] {$b_{t+1}= G(b_t\omega_t-h_t)$};
+    \draw (7,0) node[below=3pt] {$t_1$} ;
+\end{tikzpicture}
+\caption{Timing of model when insurance contract pays at the end of the year} 
+    \label{fig:M1}
+\end{figure}

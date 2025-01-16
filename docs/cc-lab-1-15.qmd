@@ -1,0 +1,338 @@
+---
+format: 
+  revealjs:
+    chalkboard: true
+    slide-number: true
+    show-slide-number: print
+    theme:
+     - ucsb-media.scss
+    logo: img/bren-logo.png
+bibliography: library.bib
+execute: 
+  warning: false
+  message: false
+
+---
+
+## {#title-slide data-menu-title="Title Slide" background=.white}
+
+[Impact of fisheries index insurance on harvest control rules]{.custom-title .blue-text}
+
+[Costello Lab meeting]{.custom-subtitle .gold}
+
+<hr class="hr-teal">
+
+[Nathaniel Grimes]{.body-text-l .center-text .blue-text}
+
+[Bren School of Environmental Science & Management]{.center-text .body-text-m .blue-text}
+
+[**Last updated:** `r format(Sys.time(), '%b %d, %Y')`]{.body-text-s .blue-text}
+
+## {background-image="https://i.insider.com/5644098bdd0895b0578b465f?width=1300&format=jpeg&auto=webp"}
+
+::: {.absolute left="30%" top="8%" right="-15%" style="font-size:1.4em; padding: 0.5em 1em; background-color: rgba(255, 255, 255, .5); backdrop-filter: blur(5px); box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .75); border-radius: 20px;"}
+- Fishers vulnerable to financial shocks from environmental variability
+
+- Few *financial* risk tools to protect against shocks
+
+- Index based insurance (IBI) has the potential to address this challenge
+
+- My previous research shows IBI creates a moral hazard to fisher harvest decisions
+:::
+
+## {#mgmt data-menu-title="Management"}
+
+[Management is a key tool to combat stochasticity in fisheries]{.slide-title}
+
+<hr>
+
+- Better managed fisheries more likely to recover and more resilient to biological shocks
+
+- Management provides constraints on fisher behavior
+
+  - If binding, IBI moral hazard of individual fishers limited 
+
+
+- Management could reduce demand for insurance as it eliminates biological risk
+
+- Managed fisheries are not immune to disasters, insurance could incentive new behavior to assist management
+
+```{r}
+#| fig-align: center
+#| fig-cap: California Red Sea Urchin population recieved federal funding in the recently passed spending bill. 7 years after the determination
+knitr::include_graphics(here::here('docs','img','uni.webp'))
+```
+
+
+## {#hcr-what data-menu-title="What are HCRs?"}
+
+[Harvest control rules are policy functions that determine catch in a given year]{.slide-title}
+
+<hr>
+
+```{r}
+#| fig-cap: From @Free2023
+
+knitr::include_graphics(here::here('docs','img','us_hcr.png'))
+```
+
+## {#hcr-how data-menu-title="How are HCRs?"}
+
+[Mandates to use Precautionary Principle]{.slide-title}
+
+<hr>
+
+::::{.columns}
+
+:::{.column}
+
+- Find upper biological limit
+
+  - Australia and Iceland use $F_{mey}$ (economic)
+
+- Reduce to account for uncertainty
+
+- Imply some level of risk aversion
+
+  - But for whom?
+
+:::
+
+:::{.column}
+
+```{r, out.width="100%"}
+knitr::include_graphics(here::here('docs','img','ocl_example.png'))
+```
+
+
+:::
+
+::::
+
+
+## {#hcr-pro data-menu-title="The Process"}
+
+[HCR's not immune to political influence]{.slide-title}
+
+<hr>
+
+```{r}
+#| fig-cap: From @Kvamsdal2016
+
+knitr::include_graphics(here::here('docs','img','hcr_flow.png'))
+```
+
+
+:::{.body-text-l}
+*"... modern HCRs are usually not derived from formal, integrated bioeconomic optimization models, but are rather simple, common-sense rules based on expert opinion"*
+:::
+
+
+## {background-image="https://images.squarespace-cdn.com/content/v1/57cf18ae6b8f5ba693497e1a/1476208218464-3JH5HJRWZ6E2GWBW36SH/AP_16137752061919.jpg?format=1500w"}
+
+::: {.absolute left="-5%" top="8%" right="50%" style="font-size:1.4em; color: rgba(255,255,255,1); padding: 0.5em 1em; background-color: rgba(255, 255, 255, .5); backdrop-filter: blur(5px); box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .75); border-radius: 20px;"}
+
+- Reductions in quota highly unpopular
+
+- Fishers need to harvest now
+
+- Quotas usually set at the highest allowed limit
+
+- Insurance could offset this tension
+:::
+
+
+## {#hcr-q data-menu-title="HCR RQ"}
+
+[Research Questions]{.slide-title}
+
+<hr>
+
+-   **Would a manager change their harvest control rule if fishers were protected by index insurance?**
+
+<br>
+
+-  **How does the timing of shocks and payouts change decisions?**
+
+<br>
+
+-   **How much would biological sustainability improve with updated HCRs?**
+
+
+## {#lit data-menu-title="Literature Review"}
+
+[Unique position in literature]{.slide-title}
+
+<hr>
+
+### Fishery HCR
+
+- Response of HCRs to uncertainty is well studied and built into the design of biological limits [@Reed1979;@Sethi2005;@Kritzer2019;@Yamazaki2009]
+
+- Few studies use utility [@Lewis1981;@Kelsall2023]
+
+  - Changes the curves to be less responsive compared to risk neutral optimization
+
+### Insurance
+
+- No fisheries insurance papers examining HCR [@Mumford2009;@Herrmann2004;@Watson2023]
+
+- Only 1 ag paper examines insurance in a dynamic setting, but they only consider one time investments, not a policy function controlled by a state variable [@muller2011]
+
+- Health insurance Within Year Decision Models closest thing in wider literature [@Cronin2019]
+
+
+## {#m-mod data-menu-title="Model"}
+
+[Manager acts as sole owner maximizing infinite utility stream of fishers]{.slide-title}
+
+<hr>
+
+$$
+\begin{aligned}
+\max_{f_t} \sum_{t=0}^\infty\beta^t\mathbb{E}_t&\left[u(f_t,\omega,b_t,I(\omega))\right]\\
+\text{s.t. } b_{t+1}&=(1+\omega_{t+1}) G(b_t-h_t) \\
+h_t&=f_tb_t(1+\omega_t) \\
+\omega&~\sim N(0,\sigma^2) \text{  i.i.d}
+\end{aligned}
+$$ {#eq-npv}
+
+::::{.columns}
+
+:::{.column}
+
+:::{.center-text}
+**Parameters**
+:::
+
+$\omega$: Weather Shock (Could impact immediate biomass or growth)
+
+$b_t$: Level of biomass (state variable)
+
+$f_t$: Proportion of stock to harvest (choice variable)
+
+$G()$: Growth Function
+:::
+
+:::{.column}
+
+**Concave utility function** $u'<0 \text{ and } u''>0$
+
+Insurance contract:
+
+$$
+\mathbb{I}[\omega]=\begin{cases}
+\overbrace{I(\omega)}^{\text{payout}}-\rho(\omega) & \text{if } v_t>\bar \omega \\
+\underbrace{-\rho(\omega)}_{\text{premium}} & \text{otherwise}\end{cases}
+$$
+:::
+
+::::
+
+
+## {#hcr-bell data-menu-title="Bellman Equation"}
+
+[Formulate as Bellman and use Value Function Iteration to solve]{.slide-title}
+
+<hr>
+
+$$
+V_t(b_t)=\max_{f_t}\mathbb{E}[u(f_t,\omega_t,\theta_t,I(\omega_t))+\beta V_{t+1}( G(b_t(1+\omega_t)-h_t))]
+$$ {#eq-bellman}
+
+- $V_t(b_t)$: Value function at time $t$ given biomass $b_t$
+
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(here::here('docs','img','post_h.png'))
+```
+
+
+## {#vfi data-menu-title="Value Function"}
+
+[Use Policy Function Iteration to solve]{.slide-title}
+
+<hr>
+
+- Set up grid of 50 biomass state variables
+
+- Numerically integrate $\mathbb{E}[u(f_t,\omega_t,\theta_t,I(\omega_t))+\beta V_{t+1}(G(b_t\omega_t-h_t))]$ for each state variable
+
+- Update value function
+
+- Repeat until function converges
+
+:::{.center-text}
+*Do I need to consider insurance/shocks in future state?*
+:::
+
+## {#hcr-res data-menu-title="HCR Preliminary"}
+
+[Preliminary Results]{.slide-title}
+
+<hr>
+
+
+```{r}
+#| fig-align: center
+
+library(tidyverse)
+
+load(here::here('data','ins_pol_unknown.Rdata'))
+load(here::here('data','no_pol_unknown.Rdata'))
+
+
+
+plot_df<-rbind(no_pol_conv %>% 
+  mutate(ins='No Insurance'),
+  ins_pol_conv %>% 
+  mutate(ins='Insurance'))
+
+
+
+
+ggplot(plot_df,aes(x=b,y=pol_opt,color=ins))+
+  geom_line(linewidth=2.5)+
+  scale_color_manual(name="",values=c("#003660","#09847A"))+
+  theme_classic()+
+  labs(y='Optimal Harvest',x='Biomass')+
+  theme(legend.text=element_text(size=24))+
+  theme(legend.title =element_text(size=28))+
+  theme(axis.text =element_text(size=22))+
+  theme(axis.title = element_text(size=26))
+```
+
+
+
+## {#mg-future data-menu-title="Future Work"}
+
+[Future Steps]{.slide-title}
+
+<hr>
+
+- Solve for optimal insurance
+
+  - Current model may be over or under providing insurance
+  
+  - Quick check on value functions seem like insurance increases converged value slightly
+
+- How do these small, but subtle differences in the HCR play out in overall stock health
+
+- Calibrate with a real-word fishery (Pacific Sardine, Skipjack, Anchoveta)
+
+
+  
+
+
+
+
+## {#ref data-menu-title="ref}
+
+[References]{.slide-title}
+
+<hr>
+
+
+
+
