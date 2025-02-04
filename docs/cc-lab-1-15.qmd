@@ -88,7 +88,7 @@ knitr::include_graphics(here::here('docs','img','us_hcr.png'))
 
 - Find upper biological limit
 
-  - Australia and Iceland use $F_{mey}$ (economic)
+  - Australia and Iceland use $B_{mey}$ (economic)
 
 - Reduce to account for uncertainty
 
@@ -156,7 +156,7 @@ knitr::include_graphics(here::here('docs','img','hcr_flow.png'))
 
 <br>
 
--   **How much would biological sustainability improve with updated HCRs?**
+-   **How much would biological sustainability change with HCRs covered with IBI?**
 
 
 ## {#lit data-menu-title="Literature Review"}
@@ -177,7 +177,7 @@ knitr::include_graphics(here::here('docs','img','hcr_flow.png'))
 
 - No fisheries insurance papers examining HCR [@Mumford2009;@Herrmann2004;@Watson2023]
 
-- Only 1 ag paper examines insurance in a dynamic setting, but they only consider one time investments, not a policy function controlled by a state variable [@muller2011]
+- Only 1 ag paper examines insurance in a dynamic setting, but they only consider one time decisions, not responses to a yearly state variable [@muller2011]
 
 - Health insurance Within Year Decision Models closest thing in wider literature [@Cronin2019]
 
@@ -191,7 +191,7 @@ knitr::include_graphics(here::here('docs','img','hcr_flow.png'))
 $$
 \begin{aligned}
 \max_{f_t} \sum_{t=0}^\infty\beta^t\mathbb{E}_t&\left[u(f_t,\omega,b_t,I(\omega))\right]\\
-\text{s.t. } b_{t+1}&=(1+\omega_{t+1}) G(b_t-h_t) \\
+\text{s.t. } b_{t+1}&=G(b_t(1+\omega_{t}) -h_t) \\
 h_t&=f_tb_t(1+\omega_t) \\
 \omega&~\sim N(0,\sigma^2) \text{  i.i.d}
 \end{aligned}
@@ -222,7 +222,7 @@ Insurance contract:
 
 $$
 \mathbb{I}[\omega]=\begin{cases}
-\overbrace{I(\omega)}^{\text{payout}}-\rho(\omega) & \text{if } v_t>\bar \omega \\
+\overbrace{I(\omega)}^{\text{payout}}-\rho(\omega) & \text{if } \omega_t>\bar \omega \\
 \underbrace{-\rho(\omega)}_{\text{premium}} & \text{otherwise}\end{cases}
 $$
 :::
@@ -296,7 +296,7 @@ ggplot(plot_df,aes(x=b,y=pol_opt,color=ins))+
   geom_line(linewidth=2.5)+
   scale_color_manual(name="",values=c("#003660","#09847A"))+
   theme_classic()+
-  labs(y='Optimal Harvest',x='Biomass')+
+  labs(y='Optimal Harvest Rate',x='Biomass')+
   theme(legend.text=element_text(size=24))+
   theme(legend.title =element_text(size=28))+
   theme(axis.text =element_text(size=22))+
