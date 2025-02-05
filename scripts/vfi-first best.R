@@ -2,7 +2,7 @@
 
 library(tidyverse)
 
-sizex = 100 #size of the state grid
+sizex = 200 #size of the state grid
 sizez = 4  #size of the shock grid
 T=50 #time horizon for backward induction
 
@@ -50,7 +50,7 @@ xgrid = seq(small,K,length.out=sizex)
 
 #z_grid=c(0.4,0.6)
 
-n_z=13
+n_z=33
 n_sims=100000
 
 set.seed(42)
@@ -135,7 +135,7 @@ pi = function(f,b,theta)
     profit=(p*harvest(f=f,biomass=b,theta = theta))-(c*(f^cshape))+payout-premium
   }else{
     
-    profit = (p*harvest(f=f,biomass=b,theta = theta))-(c*(f^cshape))-premium
+    profit = (p*harvest(f=f,biomass=b,theta = theta))-(c*(f^cshape))
   }
   
   return(profit)
@@ -148,8 +148,9 @@ Payoff = function(f,b,theta,V){
   #sp_store<-vector(mode="numeric",length=ncol(V))
   
   
+
   
-n<-which(theta==theta_val)
+  n<-which(theta==theta_val)
     
     temp<-spline(x=xgrid,y=V[,n],xout=xnext,method="natural")
     sp_store<-temp$y
@@ -253,7 +254,7 @@ ggplot(h,aes(x=b,y=fstar,color=theta,group=theta))+geom_path()+scale_color_gradi
 no_ins_sum$ins='no'
 j<-rbind(temp,no_ins_sum)
 
-ggplot(j,aes(x=b,y=pol_opt,color=ins))+geom_line()
+ggplot(temp,aes(x=b,y=pol_opt,color=ins))+geom_line()
 
 
 

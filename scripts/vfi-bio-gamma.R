@@ -15,7 +15,7 @@ p=5
 c=250
 
 
-ut_mod='cara'
+ut_mod='log'
 a=0.008 #risk aversion
 
 #Environmental parameters
@@ -34,8 +34,8 @@ hcr="two"
 
 #### Payouts and Premiums parameters ####
 insurance=1 #use insurance 1, 0 no insurance
-gamma=0.5
-trigger=-.33
+gamma=1
+trigger=0
 
 premium=gamma*pnorm(trigger,mean_theta,sigma_theta)
 
@@ -96,7 +96,7 @@ ut<-function(f,b,theta,trigger,pi,payout,premium,method='cara'){
   if(method=='cara'){
     out=1-exp(-a*(pi_out))
   }else if(method=='log'){
-    out=log(pi_out+1000)  #Plus 2000 is to make sure we dont have negative values
+    out=log(pi_out+1000)  #Plus 1000 is to make sure we dont have negative values
   }else if (method=='rn'){
     out=pi_out
   } else{
@@ -146,8 +146,9 @@ while(error=="False"){
   t=step
   print(t)
   #Loop over shocks space
-    
-    for(i in length(xgrid):1){
+   
+    for(i in 1:length(xgrid)){
+      
       b=xgrid[i]
       guess=0.1
       low=.0001
@@ -188,14 +189,15 @@ while(error=="False"){
 
 
 
-ins_pol_conv<-DFall %>% 
+ins_g1_pol_conv<-DFall %>% 
   filter(time==max(DFall$time)) %>% 
   group_by(b) %>% 
   summarize(pol_opt=mean(fstar))
 
-ggplot(ins_pol_conv,aes(x=b,y=fstar))+
+ggplot(ins_pol_conv,aes(x=b,y=pol_opt))+
   geom_line()+
-  geom_line(data=no_pol_conv,aes(x=b,y=pol_opt),color='blue')
+  geom_line(data=no_pol_conv,aes(x=b,y=pol_opt),color='blue')+
+  geom_line(data=ins_g1_pol_conv,aes(x=b,y=pol_opt),color='red')
   
 
 ggplot(rn_pol_conv,aes(x=b,y=pol_opt))+
