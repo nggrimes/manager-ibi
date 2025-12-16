@@ -15,7 +15,7 @@ p=5
 c=250
 
 
-ut_mod='log'
+ut_mod='rn'
 a=0.008 #risk aversion
 
 #Environmental parameters
@@ -125,7 +125,7 @@ Payoff = function(f,b,sim,V)
   utility<-pmap_dbl(df,ut)
   
   eu=mean(utility+temp*delta,na.rm=TRUE)
-  #xnext = max(small,f(h,x))
+
 
   
   #browser()
@@ -189,12 +189,14 @@ while(error=="False"){
 
 
 
-ins_g1_pol_conv<-DFall %>% 
+rn_pol_conv<-DFall %>% 
   filter(time==max(DFall$time)) %>% 
   group_by(b) %>% 
   summarize(pol_opt=mean(fstar))
 
-ggplot(ins_pol_conv,aes(x=b,y=pol_opt))+
+
+
+ggplot(rn_pol_conv,aes(x=b,y=pol_opt))+
   geom_line()+
   geom_line(data=no_pol_conv,aes(x=b,y=pol_opt),color='blue')+
   geom_line(data=ins_g1_pol_conv,aes(x=b,y=pol_opt),color='red')

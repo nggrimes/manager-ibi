@@ -65,11 +65,356 @@ Uncertainty has notable impacts on optimal harvest control rules. Early linear c
 
 While the various forms and impacts of uncertainty have been comprehensively studied in fisheries, few studies have integrated risk preferences of the manager or fishers in the determination of optimal harvest control rules [@Andersen1984;@Kelsall2023]. Risk aversion drastically changes the optimal policy function. Risk aversion leads to policies where quotas are set at more consistent levels regardless of the stock level [@Lewis1981]. @Kelsall2023 isolated the impacts of risk aversion on optimal escapement into investment, wealth, and gambling effects. The risky nature of the stock encourages planners to set lower escapement to extract more now and invest in a risk free alternative. My model will allow for both intertemporal substitution and risk aversion because insurance both smooths income and reduces risk^[No need for certainty equivalent $\mu$ terms]. This will allow us to capture all the effects of index insurance on a managers decision. 
 
-No studies to date have used formal insurance programs in fishery harvest control rules. The closest study to this design was done in agriculture by @muller2011. They allowed Kenyan pastoralists to maximize the future stream of welfare with an index insurance contract based on rainfall by choosing the amount of insurance coverage, the amount of pasture to rest in bad years, and the threshold for resting. However, the production choice variables were selected once at the beginning of the year and does not reflect a true harvest control rule. Their insurance moral hazard did influence the choice of pastoralists input decicions, and led to more aggressive resting strategies that could threaten the long term welfare gains of insurance.  Adapting a similar framework will help illuminate the effects of index insurance, but adding an optimal policy function allows for more structured adjustments to account for the long term effects.
+No studies to date have used formal insurance programs in fishery harvest control rules. Two studies in agriculture consider temporal dynamics, but neither defined optimal policy functions. @Bulte2021 found that in a common-pool pastoral setting index insurance will increase aggregate harvest. A social planner could limit the long run impact by setting the insurance contract. @Bulte2021 incorporated growth by analzying the steady state equilibrium of insurance in the commons. Whether insurance will lead to improve sustainability depends. @muller2011 also examined long run welfare impacts of index insurance in pasture grazing. They allowed Kenyan pastoralists to maximize the future stream of welfare with an index insurance contract based on rainfall by choosing the amount of insurance coverage, the amount of pasture to rest in bad years, and the threshold for resting. However, the production choice variables were selected once at the beginning of the period and does not reflect a true harvest control rule. Their insurance moral hazard did influence the choice of pastoralists input decicions, and led to more aggressive resting strategies that could threaten the long term welfare gains of insurance.  Adapting a similar framework will help illuminate the effects of index insurance, but adding an optimal policy function allows for more structured adjustments to account for the long term effects.
 
-In the next section I build a new fishery model where managers maximize constituent fishers discounted utility over an infinite time horizon when fishers have access to insurance. My model builds on elements present in previous fishery models, namely @Sethi2005, but adds a new layer of complexity by including index insurance.
+
 
 # Model {#sec-num}
+
+In the this section I build a new fishery model where managers maximize constituent fishers discounted utility over an infinite time horizon when fishers have access to insurance. My model builds on elements present in previous fishery models, namely @Sethi2005, but adds a new layer of complexity by including index insurance. In the numerical simulations I will compare three settings: an ex-ante insurance decisions where the maanger does not know the realization of the weather contract in the current period, an ex-post setting where fishers receive insurance payouts in the current period, and a setting where a risk neutral manager sets binding harvest rules for risk averse fishers with index insurance. In each setting, I will compare the policy function with and without insurance as well as the expected utility of fishers. 
+
+To build intutition, I first analytically solve a two period model.
+
+## Simple two-period
+
+Consider a stock of fish that grows over two periods. A manager will choose harvest in each period to maximize fisher utility considering the growth of the fish stock based on residual escapement in the first period. Let $b_1$ be the stock of fish in period 1. Harvest is the fishing mortality $f_t\in[0,1]$ multiplied by the available biomass. Biomass in each period is subject to a random weather shock $w_t$ with $\mathbb{E}[w]=0$ and known variance, $V(w)=\sigma_w^2$, that impacts productivity. Therefore, total harvest is random as shown in @eq-twoh.
+
+$$
+h_t=(1+w_t)b_tf_t
+$$ {#eq-twoh}
+
+The stock in period 2 is the growth of the residual period 1 escapement after the shock through an increasing, concave function $G(s)$ where $s=(1+w_1)b_1-(1+w)b_1f_1$ and $\partial G/\partial s>0$. 
+
+$$
+\begin{aligned}
+b_2&=G(s) \\
+b_2&=G((1+w_1)b_1-(1+w_1)b_1f_1)
+\end{aligned}
+$$
+
+This occurs after the realization of the shock in period 1 so that the manager knows the available biomass in period two, but does not know the effect of a new shock in period 2. Notice that escapement is a decreasing function of current period harvest so that total growth is also decreasing in harvest, $\frac{\partial G(s)}{\partial s}\frac{\partial s}{\partial f_1}<0$.
+
+Fishers are price takers facing a constant per unit price on harvest. Costs are a constant proportion of fishing mortality. Therefore, I can normalize the net marginal benefit from harvest to one, allowing us to examine only the effects of production on utility. As a result, fishers will choose to harvest all the available biomass in period 2.
+
+$$
+\begin{aligned}
+\pi_1&=(1+w_1)b_1f_1\\
+\pi_2&=(1+w_2)b_2
+\end{aligned}
+$$ {#eq-twopi}
+
+Considering the the second period biomass is a function of the residual growth, I substitute $b_2=G(s)$ into @eq-twopi:
+
+$$
+\begin{aligned}
+\pi_1&=(1+w_1)b_1f_1\\
+\pi_2&=(1+w_2)G(s)
+\end{aligned}
+$$ {#eq-twopi}
+
+The following collary categorizes the production risk effects of harvest in each period.
+
+:::{#cor-re}
+Current period harvest is risk increasing in fishing mortality:
+
+$$
+\frac{\partial V(\pi_1)}{\partial f_1}>0
+$$
+
+Future period harvest is risk decreasing in fishing mortality:
+
+$$
+\frac{\partial V(\pi_2)}{\partial f_1}<0
+$$
+:::
+
+:::{.proof}
+
+$$
+\begin{aligned}
+V(\pi_1)&=\sigma_w^2 (b_1f_1)^2\\
+\frac{\partial V(\pi_1)}{\partial f_1}&=2(b_1f_1)\sigma^2_w
+\\&>0
+\end{aligned}
+$$
+$$
+\begin{aligned}
+V(\pi_2)&=\sigma_w^2 (G(s))^2\\
+\frac{\partial V(\pi_2)}{\partial f_1}&=2\frac{\partial G}{\partial s}\frac{\partial{s}}{\partial{f_1}}\sigma^2_w
+\\&<0
+\end{aligned}
+$$
+
+:::
+
+An insurance contract uses $w_t$ as the index to protect fishers in both periods. Insurance pays out a proportion, $\gamma$, for every step the realized weather shock is below the trigger $\bar{w}$. Fishers must pay an actuarilly fair premium $\rho$ for access to the contract. Both the payout and premium are summarized in @eq-twoins
+
+$$
+\begin{aligned}
+I(w)&=\max(\gamma(\bar{w_t}-w_t),0) \\
+\rho&=\mathbb{E}[I(w_t)]
+\end{aligned}
+$$ {#eq-twoins}
+
+The goal of the fishery manager is to maximize total expected utility considering the future growth of the stock, the shocks, and the insurance by choosing current period harvest:
+
+$$
+\max_{f_1}\{\mathbb{E}[u(\pi_1(b_1,f_1,w_1)+I(w_1)-\rho)+\beta u(\pi_2(w_2,G(s))-I(w_2)-rho)]\}
+$$ {#eq-two-max}
+
+Where future utility is discounted by $\beta \in[0,1]$. Utility is increasing and concave, $u(\cdot)>0$ and $u''(\cdot)<0$.
+
+From here, I consider two scenarios that replicate two possible information sets. The first is readily shown by @eq-twomax. This is the ex-ante scenario where the manager has to make decisions before the realization of the insurance payout. This represents cases when the weather index is revealed during the season. The second is ex-post where the shock and insurance payouts in the first period are revealed before the manager chooses fishing mortality. This represents cases where pre-season weather shocks that affect recruitment or productivity are known. I ammend @eq-two-max by replacing $w_1$ with a realized shock $\hat{w_1}$ and shift the expectations operator to the uncertain future:
+
+$$
+\max_{f_1}\{u(\pi_1(b_1,f_1,\hat{w_1})+I(\hat{w_1})-\rho)+\beta \mathbb{E}[u(\pi_2(w_2,G(s))-I(w_2)-rho)]\}
+$$ {#eq-expost}
+
+Now the goal is to determine whether the provision of insurance changes the managers choice of harvest in the first period for each information set.
+
+:::{#prp-expost}
+When insurance pays out before the manager's decision, index insurance will decrease optimal harvest, $\partial f_! / \partial \gamma <0$. 
+:::
+
+:::{proof}
+
+The first order condition of @eq-expost is:
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1}=& \frac{\partial u(\pi_1(b_1,f_1,\hat w),I(\hat w)) \partial \pi_1(b_1,f_1,\hat w)}{\partial f_1}+\\
+&\beta\mathbb{E}[\frac{\partial u(\pi_2(w_2,G(s)),I(w_2)) \partial \pi_2(w_2,G(s))}{\partial f_1}] \\
+&=0
+\end{aligned}
+$$
+
+From here I can prove insurance decreases harvest either by using the implicit function theroem like in my first paper or using a proof in the style of Mahul and Ramaswami. I want to create a more general proof for any trigger than relying on $\bar{w}=0$.
+
+The first term goes to zero because the insurance payout and premium are fixed with respect to $f_1$. Therefore, the only effect of insurance is through the future period where harvest is risk decreasing. Insurance will decrease current period harvest when fishers are incentivized to lower harvest now to protect against future shocks. 
+
+Increasing harvest leads to less variance in the future. Insurance protects against more variance so relaxes the utility constraint harvest possesses on variance. If variance in the future is protected by insurance, fishers are more willing to allow biomass in the second period by reducing harves now.
+
+:::
+
+
+
+:::{#prp-expost}
+When insurance pays out after the manager's decision, index insurance has an ambiguous effect on optimal current period harvest, $\partial f_1 / \partial \gamma \lesseqgtr 0$. 
+:::
+
+
+:::{.proof}
+
+The first order condition of @eq-two-max is:
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1}= &\mathbb{E}[\frac{\partial u(\pi(f_1,b_1,w_1)+I(w)-\rho) \partial \pi(f_1,b_1,w_1)}{\partial f_1}+ \\
+&\beta\frac{\partial u(\pi(G(s),w_2)+I(w_2)-\rho) \partial \pi(G(s),w_2)}{\partial f_1}] 
+\end{aligned}
+$$ {#eq-twofoc}
+
+By linearity of expectations, I can break apart @eq-twofoc into current and future components as shown in @eq-two-comp:
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1}=& \overbrace{\mathbb{E}[\frac{\partial^2 u(\pi(f_1,b_1,w_1)+I(w)-\rho) \partial \pi(f_1,b_1,w_1)}{\partial f_1}]}^{\partial u_n}+ \\
+&\overbrace{\mathbb{E}[\beta\frac{\partial^2 u(\pi(G(s),w_2)+I(w_2)-\rho) \partial \pi(G(s),w_2)}{\partial f_1}]}^{\partial u_f}
+\end{aligned}
+$$ {#eq-two-comp}
+
+Each time component $u_n$ and $u_f$ can be signed based on the production risk effects found in @cor-re. The current period harvest is risk increasing in fishing mortality so insurance will increase current period harvest $\partial u_n/\partial \gamma>0$. However, future period harvest is risk decreasing in fishing mortality so insurance will decrease future period harvest $\partial u_f/\partial \gamma<0$. 
+
+When uncertainity is present now and in the future, insurance has two competing effects on current period harvest. The overall effect is ambiguous as it depends on the relative magnitude of the two effects. However, future utility is discounted so the relative emphasis may be on the current period harvest. 
+:::
+
+## Two-Period Model, Two choices {#sec-two}
+
+This altervative model does not provide any clear results, but it does reflect the Bellman formulation used in the numerical simulations more closely. All elements of the section above remain the same except now there are convex costs that do not allow me to focus only on the marginal value of harvest. Therefore, the manager must now make choices in the current period and future period. 
+
+Here are the ammended profit equations. I still substitute the growth into the second period profit:
+
+$$
+\begin{aligned}
+\pi_1&=(1+w_1)b_1f_1-c(f_1)\\
+\pi_2&=(1+w_2)G(s)f_2-c(f_2)
+\end{aligned}
+$$
+
+Profit is concave in harvest, $\partial \pi_t/\partial f_t>0$. Price is normalized to 1 to ease analysis.
+
+All other structures remain the same including growth, random shocks, and insurance contract. 
+
+A manager chooses the current and next period harvest to maximize the sum of discounted expected utility as shown in @eq-twomax
+
+$$
+U=\max_{f_1,f_2}\mathbb{E}[u(\pi(b_1,f_1,w_1)+I(w_1)-\rho)+\beta u(\pi(G(s),f_2,w_2)+I(w_2)-\rho)]
+$$ {#eq-twomax}
+
+
+The first order conditions that maximize @eq-twomax are:
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1}&= \mathbb{E}[\frac{\partial u(\pi(f_1,b_1,w_1),I(w)) \partial \pi(f_1,b_1,w_1)}{\partial f_1}+\beta\frac{\partial u(\pi(G(s),f_2,w_2),I(w_1)) \partial \pi(G(s),f_2,w_2)}{\partial f_1}] \\
+\frac{\partial U}{\partial f_2}&= \mathbb{E}[\beta\frac{\partial u(\pi(G(s),f_2,w_2),I(w_2)) \partial \pi(G(s),f_2,w_2)}{\partial f_2}]
+\end{aligned}
+$$ {#eq-twofoc-two}
+
+
+Assuming the first order condition is satisfied, we can use the implicit function theorem (IFT) to look at the impact of a change in the exogenous insurance contract. Applying IFT yields a system of equations that determine the impact of insurance on each optimal input:
+
+$$
+\begin{aligned}
+&\frac{\partial f_1}{\partial \gamma}=\frac{-1}{Det}\left[\frac{\partial U}{\partial f_2 \partial f_2}\frac{\partial U}{\partial f_1 \partial \gamma}-\frac{\partial U}{\partial f_1 \partial f_2}\frac{\partial U}{\partial f_2 \partial \gamma}\right] \\
+&\frac{\partial f_2}{\partial \gamma}=\frac{-1}{Det}\left[\frac{-\partial U}{\partial f_2 \partial f_1}\frac{\partial U}{\partial f_1 \partial \gamma}+\frac{\partial U}{\partial f_1 \partial f_1}\frac{\partial U}{\partial f_2 \partial \gamma}\right]
+\end{aligned}
+$$ {#eq-ivtsol}
+
+Because the determinant (DET) will always be positive by the second-order condition, we can focus on the interior of the brackets. If positive, then insurance will lower use of that specific input and vice versa.
+
+I can sign $\frac{\partial U}{\partial f_1 \partial \gamma}$ and $\frac{\partial U}{\partial f_2 \partial \gamma}$ based on the risk effects. But like my multiple input proof in the first paper, unless both signs are the same I cannot sign the overall effect.
+
+### IFT idea for proof (ignore for now)
+
+To find the effect of insurance on optimal first period harvest, I use the implicit function theorem to examine how $f_1$ changes with respect to the scale loading $\gamma$:
+
+$$
+\frac{f_1}{\gamma}=-\frac{\partial U/\partial f_1\partial \gamma}{\partial^2 U/\partial f_1^2}
+$$ {#eq-ift}
+
+By the sufficient condition of a maximization problem, $\partial^2U/\partial x^2$ is negative. Therefore, the sign of $\partial f_1/\partial \gamma$ depends solely on the sign of $\partial U/\partial f_1\partial \gamma$. 
+
+
+
+By the linearity of expectations, I can separate the effects of a change in harvest into immediate impacts and future impacts. To condense notation, I define the immediate impact as $\partial u_n$ and the future impact as $\partial u_f$. 
+
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1\partial \gamma}=& \overbrace{\mathbb{E}[\frac{\partial^2 u(\pi(f_1,b_1,w_1),I(w)) \partial \pi(f_1,b_1,w_1)\partial\ I(w)}{\partial f_1\partial \gamma}]}^{\partial u_n}+ \\
+&\overbrace{\mathbb{E}[\beta\frac{\partial^2 u(\pi(G(s),f_2,w_2),I(w_1)) \partial \pi(G(s),f_2,w_2)\partial I (w)}{\partial f_1\partial \gamma}]}^{\partial u_f}
+\end{aligned}
+$$ {#eq-twocomp}
+
+As with all other insurance proofs, the production risk effects determine the direction of change in harvest with insurance. Because the terms are addivitive I only need to look at the production risk effects in each period separately.
+
+The current period insurance effect follows as expected given the standard application of fishery harvest. Harvest is risk increasing as shown in @eq-curri:
+
+$$
+\begin{aligned}
+h_1&=f_1b_1(1+w_1) \\
+V(h_1)&=V(w)(b_1f_1)^2\\
+\frac{\partial V(h_1)}{\partial f_1}&=2(b_1f_1)\sigma^2_w
+\\&>0
+\end{aligned}
+$$ {#eq-curri}
+
+Therefore, insurance will increase current period harvest $\partial u_n/\partial \gamma>0$ as fishers are protected from downside risk. This result is consistent with @Grimes2025, @Mahul2001, and @Ramaswami1993. Insurance protects income in the short term incentivizing higher harvest. However, with a future period to consider, the overall effect is ambiguous.
+
+Harvest in the first period is risk decreasing in the future period as shown in @eq-futri:
+
+$$
+\begin{aligned}
+h_2&=f_2b_2(1+w_2) \\
+h_2&=f_2G(s)(1+w_2) \\
+V(h_2)&=V(w_2)(f_2G(s))^2\\
+\frac{\partial V(h_2)}{\partial f_1}&=\sigma^2_w 2f_2G(s)\frac{\partial G(s)}{\partial s}\frac{\partial s}{\partial f_1}\\
+&<0
+\end{aligned}
+$$ {#eq-futri}
+
+The growth rate is increasing in escapement $\partial G(s)/ \partial s>0$ while escapement is decreasing in harvest $\partial s/\partial f_1<0$. Therefore, insurance will decrease future period harvest $\partial u_f/\partial \gamma<0$ as fishers are incentivized to lower harvest now to protect against future shocks.
+
+When uncertainity if present now and in the future, insurance has two competing effects on current period harvest. The overall effect is ambiguous as it depends on the relative magnitude of the two effects. However, future utility is discounted so the relative emphasis may be on the current period harvest. Though for faster growing stocks where biomass can rebound quickly, the future effect may be more pronounced.
+
+
+### Ex-post two period insurance
+
+If insurance pays out before managers make the harvest rule, the incentives of the future period become the sole insurance incentive. In this case, managers now have an incentive to reduce harvest in the current period when fishers are protected by future shocks.
+
+@eq-twomax resolves uncertainity in the first period with observed payout $I(\hat w)$ and weather shock $\hat w$. The maximization problem becomes:
+
+$$
+U=\max_{f_1}u(\pi(b_1,f_1,\hat w),I(\hat w))+\mathbb{E}[\beta u(\pi(G(s),f_2,w_2),I(w_2))]
+$$ {#eq-twoexpo}
+
+The first order conditions that solve @eq-twoexpo are:
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1}&= \frac{\partial u(\pi(f_1,b_1,\hat w),I(\hat w)) \partial \pi(f_1,b_1,\hat w)}{\partial f_1}+\mathbb{E}[\beta\frac{\partial u(\pi(G(s),f_2,w_2),I(w_2)) \partial \pi(G(s),f_2,w_2)}{\partial f_1}]
+\end{aligned}
+$$ {#eq-twoexpofoc}
+
+The implicit function theorem remains the same as before in @eq-ift. Now the numerator becomes:
+
+$$
+\begin{aligned}
+\frac{\partial U}{\partial f_1\partial \gamma}=& \overbrace{\frac{\partial^2 u(\pi(f_1,b_1,\hat w),I(\hat w)) \partial \pi(f_1,b_1,\hat w)\partial\ I(\hat w)}{\partial f_1\partial \gamma}}^{\partial u_n}+ \\
+&\overbrace{\mathbb{E}[\beta\frac{\partial^2 u(\pi(G(s),f_2,w_2),I(w_2)) \partial \pi(G(s),f_2,w_2)\partial I (w)}{\partial f_1\partial \gamma}]}^{\partial u_f}
+\end{aligned}
+$$ {#eq-twoexpocomp}
+
+Because the insurance is actuarially fair, the first term in @eq-twoexpocomp is zero. Therefore, the only effect of insurance is through the future period where harvest is risk decreasing. Insurance will decrease current period harvest when payouts are observed before harvest decisions are made.
+
+In the world, managers collect data on stock assessments before setting harvest control rules. If weather variables are incorporated into the stock assessment, then managers can know if fishers in the current period will receive insurance payouts thus incentivizing higher levels of stock and conservation.
+
+While the directions may be clear, the overall magntiude is not. Additionally, the two period model the second period into the finality of time. With greater considerations of an incrementental future the insurance incentive may not be as strong. To resolve these, questions I turn towards numerical simulations to find optimal policy functions.
+
+## Numerical Simulations
+
+Description of scenarios. I will run three different scenarios that compare the effects of insurance and no insurance. Within each scenario, I will compare the policy function with and without insurance. Then I will use that policy function to forward simulate the fishery for 30 years across 500 random pathways of weather shocks to see if insurance improves biological and utility outcomes.
+
+First, I want to examime the ex-ante insurance decision where the manager does not know the realization of the weather contract in the current period. This will mimic the two period model above.
+
+Second, I want to examine the ex-post setting where fishers receive insurance payouts in the current period before harvest decisions are made. In this model, there will be two state variables: biomass and the observed shock that triggers insurance. This setting will reflect possible areas where managers have access to real time data on weather shocks that influence stock assessments.
+
+Finally, I want to examine a setting where a risk neutral manager sets binding harvest rules for risk averse fishers with index insurance. This setting will reflect possible areas where a manager is attempting to reach a biological goal. The insurance most likely will not change the policy function, but will change fisher welfare.
+
+Setting up the Bellman....
+
+
+## Preliminary results
+
+### Ex-ante Insurance
+
+The following figures show the stochastic dynamic programming solution for the ex-ante insurance decision. The first figure is the optimal policy function with and without insurance. The second is the distribution of final stock sizes after a 30 year horizon for 500 different pathways using the insurance policy function and the no insurance policy function. The last figure is the distribution of fisher utility after the same 30 year horizon and 500 different pathways.
+
+```{r}
+#| fig-align: center
+#| fig-width: 7
+
+knitr::include_graphics(here::here('docs','img','scen_1_policy.png'))
+```
+
+
+```{r}
+#| fig-align: center
+#| fig-width: 7
+#| 
+knitr::include_graphics(here::here('docs','img','scen_1_bio.png'))
+```
+
+
+```{r}
+#| fig-align: center
+#| fig-width: 7
+#| 
+knitr::include_graphics(here::here('docs','img','scen_1_ut.png'))
+```
+
+
+### Ex-post insurance
+
+```{r}
+#| fig-align: center
+
+knitr::include_graphics(here::here('docs','img','post-shock-policy.png'))
+```
+
+
+## Infinte Horizon
 
 I consider a fishery in discrete time with a single fish stock. The stock, $b_t$, grows based on the residual escapement, $s_t$, of fish after harvest $h_t$ and a future stochastic weather shock $z^\theta_{t+1}$ (@eq-growth).
 
@@ -329,5 +674,27 @@ The model will be simulated with the new policy function to assess the impacts o
 
 
 {{< pagebreak >}}
+
+**Using Mahul and Ramaswami style proof**
+
+Each term can be decomponsed by the definition of covariance:
+
+$$
+\begin{aligned}
+\partial u_n&=\mathbb{E}[\frac{\partial u(\pi(f_1,b_1,w_1),I(w))]}{\partial f_1} \mathbb{E}[\frac{\partial \pi(f_1,b_1,w_1)}{\partial f_1}]+\text{cov}(\frac{\partial u}{\partial f_1},\frac{\partial \pi(b_1,f_1,w)}{\partial f_1}) \\
+\partial u_f&=\beta\left(\mathbb{E}[\frac{\partial u(\pi(G(s),f_2,w_2),I(w_1))}{\partial f_1}] \mathbb{E}[\frac{\partial \pi(G(s),f_2,w_2)}{\partial f_1}]+\text{cov}(\frac{\partial u}{\partial f_1},\frac{\partial \pi(G(s),f_2,w_2)}{\partial f_1})\right)
+\end{aligned}
+$$
+
+:::{.proposition}
+For a risk averse fishers, $0>cov(\partial u(f_1,b_1,I(w))/\partial f_1,\partial \pi(b_1,f_1,w)/\partial f_1)>cov(\partial u(f_1,b_1,0)/\partial f_1,\partial \pi(b_1,f_1,)/\partial f_1)$ if $\partial V(\pi(f_1,b_1,w)/ \partial f_1>0$. $0<cov(\partial u(f_1,b_1,I(w)/\partial f_1,\partial \pi(b_1,f_1,w)/\partial f_1)<cov(\partial u(f_1,b_1,0)/\partial f_1,\partial \pi(b_1,f_1,)/\partial f_1)$ if $\partial V(\pi(f_1,b_1,w)/ \partial f_1>0$. 
+:::{#prp-twocur}
+
+The proof of #prp-twocur is included in the appendix. The outcome of #prp-twocur is that insurance has two incentive pathways to adjust current period harvest. First, current period utility $\partial u_n$ uses a risk increasing input. Insurance alleviates this constraint incentivizing additional harvest as shown in @Grimes2025, @Mahul2001, and @Ramaswami1993. 
+
+Current period harvest is a risk decreasing input in the future period. Therefore, insurance will lower harvest in the current period. Current period harvest acts as a risk decreasing input because it lowers the amount of biomass in the next period. Biomass captures the randomness of the second period. Fewer fish in the next period implicitly lowers the variance of the next period. Insurance will protect against future flucutations so that fishers are incentivized to decrease harvest now. 
+
+It is impossible to sign the overall effect of insurance as it is the additive combination of the marginal changes in $\partial u_n$ and $\partial u_f$. However, the discount rate will probably skew the change towards more short term harvest as future harvest is less valuable. The magnitude of difference may also be dependent on the initial level of biomass $b_1$ because the growth rate depends on the standing stock available. 
+
 
 # References {.unnumbered}
