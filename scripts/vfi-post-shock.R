@@ -21,6 +21,7 @@ mean_theta=0
 
 sigma_theta=0.2
 
+ut_mod="cara"
 
 #### Payouts and Premiums parameters ####
 insurance=0 #use insurance 1, 0 no insurance
@@ -256,7 +257,31 @@ rbind(two_line_noi,two_line_i) |>
 
 ggsave(here::here("docs","img","post-shock-policy.png"),width = 7, height = 5)
 
+conv<-DFall |> 
+  filter(time==max(DFall$time))
 
+parameters<-data.frame(
+  r=r,
+  K=K,
+  small=small,
+  p=p,
+  c=c,
+  a=a,
+  delta=delta,
+  cshape=cshape,
+  mean_theta=mean_theta,
+  sigma_theta=sigma_theta,
+  insurance=insurance,
+  gamma=gamma,
+  coverage=coverage,
+  premium=premium,
+  trigger=trigger,
+  ut_mod=ut_mod
+)
+
+policy<-list(conv=conv,parameters=parameters)
+
+save(policy,file=here::here("data","post-shock-policy-i-12-13-25.RData"))
 
 DFall |> filter(time==max(DFall$time)) |> 
   ggplot(aes(x=b,y=fstar,color=as.factor(theta)))+

@@ -16,7 +16,7 @@ rnd_weather <- replicate(500, rnorm(30, 0, 0.5))
 
 #replace any values of rnd_Weather less than -1 with -0.99
 
-rnd_weather[rnd_weather < -.75] <- -0.75
+rnd_weather[rnd_weather < -1] <- -0.99
 
 
 ### Parameters
@@ -101,7 +101,7 @@ ut<-function(f,b,theta,trigger,pi,payout,premium,method='cara'){
   return(out)
 }
 
-b0=100
+b0=500
 
 final_ut<-rep(NA,500)
 final_b<-rep(NA,500)
@@ -130,7 +130,7 @@ for(j in 1:ncol(rnd_weather)){
   
   f_ins<-spline(x=ins_pol_conv$b,y=ins_pol_conv$pol_opt,xout=sim$ins_b[1])$y
   f_no<-spline(x=no_pol_conv$b,y=no_pol_conv$pol_opt,xout=sim$no_b[1])$y
-  f_rn<-spline(x=rn_pol_conv$b,y=rn_pol_conv$pol_opt,xout=sim$rn_b[1])$y
+  f_rn<-spline(x=no_pol_conv$b,y=no_pol_conv$pol_opt,xout=sim$rn_b[1])$y
   
   # get insurance utility
   temp_pi<-pi(f_ins,sim$ins_b[1],rnd_weather[1,j])
@@ -160,7 +160,7 @@ for(j in 1:ncol(rnd_weather)){
     
     f_ins<-spline(x=ins_pol_conv$b,y=ins_pol_conv$pol_opt,xout=sim$ins_b[i])$y
     f_no<-spline(x=no_pol_conv$b,y=no_pol_conv$pol_opt,xout=sim$no_b[i])$y
-    f_rn<-spline(x=rn_pol_conv$b,y=rn_pol_conv$pol_opt,xout=sim$rn_b[i])$y
+    f_rn<-spline(x=no_pol_conv$b,y=no_pol_conv$pol_opt,xout=sim$rn_b[i])$y
     
     # get insurance utility
     temp_pi<-pi(f_ins,sim$ins_b[i],rnd_weather[i,j])
@@ -210,7 +210,7 @@ df |> filter(variable %in% c('final_ut', 'final_ut_no','final_ut_rn')) |>
   geom_density(alpha=0.33,linewidth=2.5) +
   theme_minimal() +
   scale_color_manual(name="",values=c("#003660","#79A540","red"),guide='none')+
-  scale_fill_manual(name="",values=c("#003660","#79A540","red"),labels=c("Insurance","No Insurance","RN"))+
+  scale_fill_manual(name="",values=c("#003660","#79A540","red"),labels=c('final_ut'="Insurance",'final_ut_no'="No Insurance",'final_ut_rn'="No Ins Policy Fcn\n w/ ins"))+
   theme_classic()+
   theme(legend.text=element_text(size=24))+
   theme(legend.title =element_text(size=28))+
