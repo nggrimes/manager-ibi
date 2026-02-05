@@ -1,7 +1,7 @@
 vfi_pre_fcn<-function(sizex,n_z,cshape,delta,
                       r,K,p,c,a,
                       mean_theta,sigma_theta,
-                      gamma,coverage,
+                      gamma,trigger,m,
                       ut_mod){
   
   
@@ -13,10 +13,8 @@ vfi_pre_fcn<-function(sizex,n_z,cshape,delta,
   sim<-rnorm(1000,mean=mean_theta,sd=sigma_theta)
   
   sim<-sim[which(sim>=-1)]
-  
-  trigger=coverage
-  
-  premium=mean(gamma*map_dbl(trigger-sim,~max(0,.x)))
+
+  premium_rate=mean(map_dbl(trigger-sim,~max(0,.x)))*(1+m) 
   
   
   
@@ -40,7 +38,7 @@ vfi_pre_fcn<-function(sizex,n_z,cshape,delta,
   
   while(error=="False"){
     t=step
-    print(t)
+    #print(t)
     #Loop over shocks space
    
     for(i in 1:length(xgrid)){
@@ -59,10 +57,11 @@ vfi_pre_fcn<-function(sizex,n_z,cshape,delta,
       }
       
       
-      
+      payout=p*b*gamma
+      premium=payout*payout
       #output = nloptr(x0=guess,eval_f=Payoff_pre,lb=0.0001,ub=1,opts=options,b=b,V=V,sim=sim,r=r,K=K,delta=delta,ra=a,ut_mod=ut_mod,xgrid=xgrid,p=p,c=c,cshape=cshape,trigger=trigger,premium=premium,gamma=gamma)
       
-      output = optim(par=guess,fn=Payoff_pre,lower=0.00001,upper=1,b=b,V=V,sim=sim,r=r,K=K,delta=delta,ra=a,ut_mod=ut_mod,xgrid=xgrid,p=p,c=c,cshape=cshape,trigger=trigger,premium=premium,gamma=gamma,method='L-BFGS-B')
+      output = optim(par=guess,fn=Payoff_pre,lower=0.00001,upper=1,b=b,V=V,sim=sim,r=r,K=K,delta=delta,ra=a,ut_mod=ut_mod,xgrid=xgrid,p=p,c=c,cshape=cshape,trigger=trigger,premium=premium,gamma=payout,method='L-BFGS-B')
       fstar = output$par
       Vstar = -output$val
       Vnext[i]=Vstar
@@ -112,13 +111,13 @@ vfi_pre_fcn<-function(sizex,n_z,cshape,delta,
     mean_theta=mean_theta,
     sigma_theta=sigma_theta,
     gamma=gamma,
-    coverage=coverage,
+    trigger=trigger,
     premium=premium,
     trigger=trigger,
     ut_mod=ut_mod
   )
   
   policy<-list(conv=conv,parameters=parameters)
-  
+ 
   return(policy)
 }

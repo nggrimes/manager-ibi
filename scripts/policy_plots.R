@@ -5,9 +5,14 @@ load(here::here("data","vfi_post_out_insurance_1-9-26.Rdata"))
 
 post_df<-bind_rows(vfi_post_out)
 
-sig_choice<-unique(post_df$parameters$sigma_theta)[1]
+sig_choice<-unique(post_df$parameters$sigma_theta)[2]
 
 ## Get realized theta_prop for post evaluation
+
+shock_process <- discretize_normal_shock(15, 0, sig_choice)
+w_grid <- shock_process$w_grid
+w_probs <- shock_process$probs
+theta_prop<-w_probs
 
 mean_theta=0
 sigma_theta=sig_choice
@@ -42,7 +47,7 @@ theta_val=means$mean
 
 summary_post<-post_df |> 
   group_by(parameters$gamma,parameters$ut_mod,conv$b,parameters$sigma_theta) |> 
-  summarize(mean=weighted.mean(conv$Vstar,theta_prop)) |>
+  summarize(mean=weighted.mean(conv$Vstar,w_probs)) |>
   ungroup() |> 
   rename(gamma="parameters$gamma",
          ut_mod="parameters$ut_mod",
@@ -68,27 +73,27 @@ summary_pre<-pre_df |>
 
 
 policy_post<-post_df |> 
-  filter(parameters$gamma==250 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice)
+  filter(parameters$gamma==0.25 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice  & parameters$a==0.5 & parameters$trigger==-0.1)
 
 policy_pre<-pre_df |>
-  filter(parameters$gamma==250 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice)
+  filter(parameters$gamma==0.25 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice  & parameters$a==0.5 & parameters$trigger==-0.1)
 
 policy_post_noi<-post_df |> 
-  filter(parameters$gamma==0 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice)
+  filter(parameters$gamma==0 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice  & parameters$a==0.5 & parameters$trigger==-0.1)
 
 policy_pre_noi<-pre_df |> 
-  filter(parameters$gamma==0 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice)
+  filter(parameters$gamma==0 & parameters$ut_mod=='power' & parameters$sigma_theta==sig_choice  & parameters$a==0.5 & parameters$trigger==-0.1)
 
-vals_rescaled <- scales::rescale(theta_val)
+vals_rescaled <- scales::rescale(w_grid)
 
 # diverging palette
 pal_fun <- scales::col_numeric(
   palette = c("red", "grey80", "blue"),
-  domain  = range(theta_val)
+  domain  = range(w_grid)
 )
 
 # named vector for scale_color_manual
-cols <- setNames(pal_fun(theta_val), levels(as.factor(theta_val)))
+cols <- setNames(pal_fun(w_grid), levels(as.factor(w_grid)))
 
 # pal_fun <- col_numeric(
 #   palette = c("red", "grey80", "blue"),
@@ -96,15 +101,15 @@ cols <- setNames(pal_fun(theta_val), levels(as.factor(theta_val)))
 # )
 
 trig<-unique(policy_post$parameters$trigger)
-trig_index<-which(theta_val==trig)
-
+trig_index<-which(w_grid==trig)
+trig_end<-length(w_grid)
 
 two_line_noi<-policy_post_noi %>% 
   mutate(pay=ifelse(conv$theta>trig,'no','yes')) |> 
   group_by(conv$b,pay) %>%
   mutate(custom_weight=case_when(
     pay=="yes"~theta_prop[1:trig_index][row_number()],
-    pay=="no"~theta_prop[(trig_index+1):13][row_number()]
+    pay=="no"~theta_prop[(trig_index+1):trig_end][row_number()]
   )) |> 
   summarize(fstar=weighted.mean(conv$fstar,w=custom_weight)) |>
   ungroup() |> 
@@ -116,7 +121,7 @@ two_line_i<-policy_post |>
   group_by(conv$b,pay) %>%
   mutate(custom_weight=case_when(
     pay=="yes"~theta_prop[1:trig_index][row_number()],
-    pay=="no"~theta_prop[(trig_index+1):13][row_number()]
+    pay=="no"~theta_prop[(trig_index+1):trig_end][row_number()]
   )) |> 
   summarize(fstar=weighted.mean(conv$fstar,w=custom_weight,na.rm=TRUE)) |>
   ungroup() |> 
@@ -127,7 +132,7 @@ two_line_i<-policy_post |>
 rbind(two_line_noi,two_line_i) |> 
   ggplot(aes(x=b,y=fstar,color=pay))+
   geom_line(aes(linetype = ins),linewidth=1.5)+
-  ylim(0,0.5)+
+  ylim(0,1)+
   scale_color_manual(name='Environmental\nShock',values=c('no'='#047C90','yes'='#78A540'),labels=c('yes'='Negative Shock','no'='Positive Shock'))+
   theme_minimal()+
   labs(title=paste0('Post','- ','Risk Aversion:',policy_post$parameters$ut_mod[1],' ','Sigma:',sig_choice))
@@ -141,7 +146,7 @@ p_df<-policy_pre |>
 rbind(p_noi_df,p_df) |> 
   ggplot(aes(x=conv$b,y=conv$fstar,linetype=ins))+
   geom_line(linewidth=1.5)+
-  ylim(0,0.5)+
+  ylim(0,1)+
   theme_minimal()+
   labs(title=paste0('Pre','- ','Risk Aversion:',policy_pre$parameters$ut_mod[1],' ','Sigma:',sig_choice))
 
