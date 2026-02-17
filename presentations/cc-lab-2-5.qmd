@@ -1,0 +1,548 @@
+---
+format: 
+  revealjs:
+    chalkboard: true
+    slide-number: true
+    show-slide-number: print
+    theme:
+     - ucsb-media.scss
+    logo: img/bren-logo.png
+---
+
+##  {#title-slide data-menu-title="Title Slide" background=".white"}
+
+[Dynamic input choices for renewable resources with index insurance]{.custom-title .blue-text}
+
+[Costello Lab Meeting]{.custom-subtitle .gold}
+
+<hr class="hr-teal">
+
+[Nathaniel Grimes]{.body-text-l .center-text .blue-text}
+
+[Bren School of Environmental Science & Management]{.center-text .body-text-m .blue-text}
+
+[**Last updated:** `r format(Sys.time(), '%b %d, %Y')`]{.body-text-s .blue-text}
+
+##  {background-image="https://wp-cpr.s3.amazonaws.com/uploads/2020/10/IMG_8413-scaled.jpg"}
+
+::: {.absolute left="30%" top="5%" style="font-size:1.2em; padding: 0.5em 1em; background-color: rgba(255, 255, 255, .5); backdrop-filter: blur(5px); box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .75); border-radius: 20px;"}
+
+[Food systems rely on renewable resources]{.blue-text .center-text .body-text-l}
+
+[Yet, are vulnerable to environmental stochasticity]{.blue-text .center-text .body-text-l}
+:::
+
+
+## {#shocks data-menu-title="Shocks"}
+
+[Shocks persist in dynamic resources]{.slide-title}
+
+<hr>
+
+::::{.columns}
+
+:::{.column}
+
+<img src="https://extension.sdstate.edu/sites/default/files/styles/facebook/public/2022-04/W-01312-02-Overgrazing-Grazing-Range-Reangeland-Grassland-Forage.jpg?h=397ba5a5&itok=I1AMMDxk">
+
+- Grazed fields after drought recover slower
+
+:::
+
+:::{.column}
+
+<img src="https://cdn.mos.cms.futurecdn.net/Nu6AK8q4Pwj8yVsAseRedM.jpg">
+
+
+- Marine heatwave in 2022 collapsed Bering Sea Crab
+
+- Restricted openings in 2024 and 2025
+:::
+
+::::
+
+[Systems most vulnerable after shocks]{.body-text-l .center-text .blue-text}
+
+## {#insurance data-menu-title="Insurance"}
+
+[Index Insurance is a potential tool to mitigate shocks]{.slide-title}
+
+<hr>
+
+
+```{r}
+knitr::include_graphics(here::here("presentations","img","windex.png"))
+```
+
+[Providing insurance could help reduce pressure when systems are most vulnerable]{.blue-text .body-text-l .center-text}
+
+
+## {#behavior data-menu-title="Behavioral Responses"}
+
+[Index Insurance incentivizes behavior change]{.slide-title2}
+
+<hr>
+
+::::::::: columns
+:::: {.column width="33%"}
+::: center-text
+**Overstock Pastures**
+:::
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(here::here('presentations','img','pasture.png'))
+```
+::::
+
+:::: {.column width="33%"}
+::: center-text
+**Chemical Use** $\lessgtr0$
+:::
+
+```{r}
+#| fig-align: center
+knitr::include_graphics(here::here('presentations','img','fert.png'))
+```
+::::
+
+:::: {.column width="33%"}
+::: center-text
+**Change Effort** $\lessgtr0$
+:::
+
+```{r}
+#| fig-align: center
+#| out-width: 3.25in
+#| out-height: 3.75in
+knitr::include_graphics(here::here('presentations','img','fish.jpg'))
+```
+::::
+:::::::::
+
+
+
+## {#risk-effects data-menu-title="Risk Effects"}
+
+[Direction driven by risk effects of inputs]{.slide-title2}
+
+<hr>
+
+::::{.columns}
+
+:::{.column}
+
+
+[**Risk increasing inputs** ]{.blue-text .body-text-l .center-text}
+
+$$
+\frac{\partial Var(h)}{\partial x} > 0
+$$
+
+**Insurance always increases use of risk increasing inputs**
+
+Inputs add risk, insurance protects against added risk
+:::
+
+:::{.column}
+
+
+[**Risk decreasing inputs**]{.blue-text .body-text-l .center-text}
+
+$$
+\frac{\partial Var(h)}{\partial x} < 0
+$$
+
+**Insurance always decreases use of risk decreasing inputs**
+
+Inputs lower risk, insurance substitutes risk, making investment less necessary
+:::
+
+::::
+
+
+## {#dynamics data-menu-title="Dynamics"}
+
+[Few studies consider dynamic optimal behavior]{.slide-title2}
+
+<hr>
+
+- Ranchers increase stock size, reducing pasture health (Bulte et al., 2021, Mueller et al., 2017)
+
+  - Mueller used discounted simulations to optimze one-time decison
+  
+  - Bulte (2021) used steady state stock dynamics to see insurance decision affects on equilibrium stock size
+  
+- Ranchers increase asset saving and investment with index insurance (Janzen et al., 2020)
+
+  - Optimal consumption policy with insurance
+  
+  - Downside risk only, no interaction with the environment
+  
+  - Significant reduction in poverty
+
+## {#res data-menu-title="Research Questions"}
+
+[Research Questions]{.slide-title}
+
+<hr>
+
+[**1. How does insurance change the optimal harvest policy function?**]{.body-text-l}
+
+<br>
+
+[**2. How does the timing of the payout influence harvest decisons?**]{.body-text-l}
+
+<br>
+
+[**3. Are communities better off in the long run with insurance?**]{.body-text-l}
+
+## {#method data-menu-title="Methodology"}
+
+[Method outline]{.slide-title}
+
+<hr>
+
+[1. Build a two period model for each information set to break down how insurance influences decisions in dynamic setting ]{.body-text-l .blue-text}
+
+<br>
+
+[2. Solve the infinite case using dynamic programming]{.body-text-l .blue-text}
+
+<br>
+
+[3. Simulate the model under different insurance scenarios and compare outcomes]{.body-text-l .blue-text}
+
+## {#results-preview data-menu-title="Results Preview"}
+
+[Results Preview]{.slide-title}
+
+<hr>
+
+[**Result 1:** Insurance incentivizes immediate increases to harvest, but also also increase the shadow value of residual stock]{.body-text-l .blue-text}
+
+<br>
+
+[**Result 2:** Insurance incentivizes stronger decreases in harvest if information on payouts is available before harvest decison]{.body-text-l .blue-text}
+
+<br>
+
+[**Result 3:** There is little effect on conservation of resources, but large community welfare gains]{.body-text-l .blue-text}
+
+
+## {#fish data-menu-title="Fisheries"}
+
+[Use a fisheries setting]{.slide-title}
+
+<hr>
+
+- Policy Relevant
+
+    - Push to use insurance in fisheries
+    
+    - Fisheries are very vulnerable to shocks
+    
+    - Strong dynamic component
+    
+- Managers are demonstrable forward looking decision makers
+
+    - Clear objective to maximize community welfare
+    
+    - Interaction of management and insurance yet to be studied
+    
+    - Less clear if farmers and ranchers are forward looking
+    
+## {#two-period data-menu-title="Two Period Model"}
+
+[Start with a two period model]{.slide-title}
+
+<hr>
+
+$$
+\begin{aligned}
+\max_{f_t} \quad &\sum_{t=0}^1 \beta^{t} \mathbb{E}[u(f_t,b_t,w_t,I(w_t),\rho)] \\
+\text{subject to:}  \quad\\
+&b_{t+1} = G(s)\\
+&0 \leq f_t \leq 1 \\
+&I(w)=(\gamma(\max\{0, \bar{w_t} - w_t\})) \\
+&\rho=\mathbb{E}[I(w)]
+\end{aligned}
+$$
+
+::::{.columns}
+
+:::{.column}
+
+:::{.body-text-s}
+
+$u'(\cdot)>0$, and $u''(\cdot)<0$.
+
+$G'(s)>0$ : Growth Function
+
+$s=(1+w) b_t(1-  f_t)$ : Post-shock escapement
+
+$I(w)$ : Insurance payout function
+
+$\rho$ : Insurance premium
+
+:::
+
+:::
+
+:::{.column}
+:::{.body-text-s}
+$f_t$ : Fishing mortality
+
+$b_t$ : Biomass at the beginning of period $t$
+
+$w_t$ : Environmental shock  $\mathbb{E}[w_t]=0$ and $Var(w_t)=\sigma^2$
+
+:::
+
+:::
+
+::::
+
+## {#backwards data-menu-title="Backward Induction"}
+
+[Solve through backwards induction]{.slide-title}
+
+<hr>
+
+:::{.center-text}
+**Terminal Period**
+:::
+
+$$
+V_2(b_2) = \max_{f_2} \mathbb{E}[u(f_2,b_2,w_2,I(w_2),\rho)]
+$$
+
+:::{.center-text}
+**First Period**
+:::
+
+$$
+V_1(b_1) = \max_{f_1} \mathbb{
+E}[u(f_1,b_1,w_1,I(w_1),\rho) + \beta V_2(G(s))]
+$$
+
+## {#information data-menu-title="Information Sets"}
+
+[Consider different information sets]{.slide-title}
+
+<hr>
+
+::::{.columns}
+
+:::{.column}
+
+:::{.center-text}
+**Ex-ante**
+:::
+
+:::{.body-text-s}
+$$
+V_2(b_2) = \max_{f_2} \mathbb{E}[u(f_2,b_2,w_2,I(w_2),\rho)]
+$$
+
+$$
+\begin{aligned}
+V_1(b_1) = \max_{f_1} \mathbb{
+E}[u(f_1,b_1,w_1,I(w_1),\rho)\\ + \beta V_2(G(s))]
+\end{aligned}
+$$
+:::
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRe20jLLMs84QDmj_myooD5oT3WtvMc_-FOSg&s" align="center" width="800"/>
+
+
+:::
+
+:::{.column}
+:::{.center-text}
+**Ex-post**
+
+:::
+
+:::{.body-text-s}
+$$
+V_2(b_2,\hat{w_2}) = \max_{f_2} \mathbb{E}u(f_2,b_2,\hat{w_2},I(\hat{w_2}),\rho)
+$$
+
+
+$$
+\begin{aligned}
+V_1(b_1,\hat{w_1}) = \max_{f_1} u(f_1,b_1,\hat{w_1},I(\hat{w_1}),\rho) \\+ \mathbb{E}[\beta V_2(G(s))]
+\end{aligned}
+$$
+
+:::
+
+<img src="https://hakaimagazine.com/wp-content/uploads/fisher-peru-anchoveta.jpg" align="center" width="800"/>
+
+:::
+
+::::
+
+## {#exante data-menu-title="Ex-ante"}
+
+[Solve Ex-ante case first]{.slide-title}
+
+<hr>
+
+- I want to know how the choice of harvest in the first changes with insurance, knowing that in the terminal period the manager will harvest optimally
+
+First Order Conditions:
+
+$$
+\frac{\partial V_2(b_2)}{\partial f_2} = \mathbb{E}[\frac{\partial u}{\partial f_2}] = 0
+$$
+
+$$
+\frac{\partial V_1(b_1)}{\partial f_1}= \mathbb{E}[\frac{\partial u}{\partial f_1} + \beta V_2'(b_2)\frac{\partial G(s)}{\partial f_1}] = 0
+$$
+
+Standard interpretation:
+
+- Harvest as much as utility maximizing in the terminal period
+
+- Leave behind some stock in the first period according the shadow value of future use
+
+## {#ift data-menu-title="Implicit Function Theroem"}
+
+[Implicit Function Theorem]{.slide-title}
+
+<hr>
+
+$$
+\frac{\partial f_1}{\gamma}=-\frac{\partial V_1/\partial f_1\partial \gamma}{\partial V_1/\partial f_1\partial f_1}
+$$
+
+By sufficient conditions of a maximization problem, only need to sign the numerator
+
+$$
+\frac{\partial V_1}{\partial f_1 \partial \gamma} = \mathbb{E}[\frac{\partial u}{\partial f_1 \partial \gamma} + \beta \frac{V_2'(b_2)}{\partial \gamma}\frac{\partial G(s)}{\partial f_1}]
+$$
+
+## {#ri data-menu-title="Risk Increasing"}
+
+[Production is risk increasing in fishing mortality]{.slide-title}
+
+
+<hr>
+
+$$
+\begin{aligned}
+h&=(1+w_t)b_tf_t \\
+Var(h)&=\sigma^2 (b_t f_t)^2\\
+\frac{\partial Var(h)}{\partial f_t} &= 2\sigma^2 b_t^2 f_t \\
+&>0
+\end{aligned}
+$$
+
+[This is true in both periods]{.blue-text .body-text-m .center-text}
+
+[**Insurance always increases use of risk increasing inputs**]{.blue-text .body-text-l .center-text}
+
+## {#Ins-effect data-menu-title="Insurance Effects"}
+
+[Insurance has two countervailing effects on optimal harvest]{.slide-title}
+
+<hr>
+
+
+$$
+\begin{aligned}
+\frac{\partial V_1}{\partial f_1 \partial \gamma}& = \mathbb{E}[\overbrace{\frac{\partial u}{\partial f_1 \partial \gamma}}^{+} + \overbrace{\beta \frac{V_2'(b_2)}{\partial \gamma}\frac{\partial G(s)}{\partial f_1}]}^- \\
+&\lesseqgtr0\\
+\text{So that:}\\
+\frac{\partial f_1^*}{\partial \gamma} &\lesseqgtr 0
+\end{aligned}
+$$
+
+The second term is signed (+) using the envelope theorem. Insurance increases the value of future harvest.
+
+Growth function is decreasing in harvest, so $\frac{\partial G(s)}{\partial f_1}<0$
+
+## {#inutition  data-menu-title="Intuition"}
+
+[Does this make sense?]{.slide-title}
+
+<hr>
+
+More biomass in the second period increases the variance of harvest.
+
+Insurance will protect against that future variance.
+
+Therefore, insurance increases the shadow value of a fish
+
+Essentially, harvest now is *risk decreasing*
+
+Which effect dominates depends on the current state of biomass, the marginal growth rate, discounting, and risk aversion.
+
+## {#expost data-menu-title="Ex-post"}
+
+[Ex-post Case]{.slide-title}
+
+<hr>
+
+Same outcome as prior, but now amplified by conditioning on the state
+
+- In the good state, magrinal utility is comparatively lower because of insurance
+
+- In the bad state, the marginal utility is higher because of insurance
+
+[**Insurance incentivizes stronger increases in harvest in the good state, and stronger decreases in harvest in the bad state**]{.blue-text .body-text-l .center-text}
+
+
+## {#vfi data-menu-title="Value Function"}
+
+[Use value function iteration to solve the infinite case]{.slide-title}
+
+<hr>
+
+$$
+\begin{aligned}
+V(b) = \max_{f} \mathbb{E}[u(f,b,w
+,I(w),\rho) + \beta V(G(s))]
+\end{aligned}
+$$
+
+$u=\frac{(\pi+I(w)-\rho)^{1-\eta}}{1-\eta}$ : CRRA Utility
+
+$G(s) = s + r s (1-\frac{s}{K})$ : Logistic Growth Function
+
+  - $K$ : Carrying Capacity
+  
+  - $r$ : Intrinsic Growth Rate
+
+$\pi=p*b*f-cf^{1.3}$ : Fishing profit function
+
+$I(w)=(\gamma(\max\{0, \bar{w_t} - w_t\}))$ : Insurance payout function
+
+$\rho=\mathbb{E}[I(w)]$ : Insurance premium
+
+## {#vfi-results data-menu-title="VFI Results"}
+
+[Ex-ante Policy Function]{.slide-title}
+
+<hr>
+
+## {#vfi-expost data-menu-title="Ex-post Policy Function"}
+
+[Ex-post Policy Function]{.slide-title}
+
+<hr>
+
+## {#sim data-menu-title="Simulations"}
+
+[Ex-ante simulations: Utility]{.slide-title}
+
+<hr>
+
+## {#sim data-menu-title="Simulations"}
+
+[Ex-ante simulations: Biomass]{.slide-title}
+
+<hr>
+
+
