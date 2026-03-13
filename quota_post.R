@@ -1,4 +1,4 @@
-#### Weighted optimization VFI ####
+#### Post-Shock With Quota ####
 
 library(ggplot2)
 library(reshape2)
@@ -51,7 +51,7 @@ cov_rate<-0.5
 # Iteration parameters
 max_iter <- 300
 tol <- 1e-4
-alpha=0 # Weight on harvest vs utility (1=harvest only, 0=utility only)
+alpha=1 # Weight on harvest vs utility (1=harvest only, 0=utility only)
 
 
 # ==============================================================================
@@ -123,7 +123,7 @@ growth <- function(escapement) {
 
 # Harvest function: h = q * E * B * (1 + w)
 harvest_function <- function(effort, biomass, shock,quota) {
-
+  
   available_biomass <- biomass * (1 + shock)
   available_biomass <- max(available_biomass, 0)
   harvest <- q * effort * available_biomass
@@ -157,72 +157,82 @@ pay<-map_dbl(.x=w_grid,
 premium<-premium_rate*cov_rate*max_coverage
 
 # Max functions
-ut_max<-function(effort,biomass,quota,pay,premium){
- 
-  e_harvest<-map_dbl(.x=w_grid,
-                  .f=~harvest_function(effort=effort,
-                                       biomass=biomass,
-                                       quota=quota,
-                                       shock=.x))
+ut_max_post<-function(effort,biomass,w,quota,pay,premium){
+  
+  e_harvest<-harvest_function(effort=effort,
+                              biomass=biomass,
+                              shock=w,
+                              quota=quota)
   
   
   pi<-e_harvest-c_cost*effort^2+pay-premium
   
   e_ut<-map_dbl(.x=pi,
-             .f=~utility(c=.x,gamma=gamma,boost=0,mod='cara'))*w_probs
+                .f=~utility(c=.x,gamma=gamma,boost=0,mod='cara'))
   
   return(-sum(e_ut))
 }
 
-objective_fcn<-function(choice,b,V_now,pay_vec,premium){
-
+objective_fcn_post<-function(choice,b,w,V_now,pay_vec,premium){
+  
   quota<-choice[1]
   
   obj<-optim(par=0.1,
-        fn=ut_max,
-        biomass=b,
-        quota=quota,
-        pay=pay_vec,
-        premium=premium,
-        method="L-BFGS-B",
-        lower=0,
-        upper=effort_max)
-
+             fn=ut_max_post,
+             biomass=b,
+             quota=quota,
+             w=w,
+             pay=pay_vec,
+             premium=premium,
+             method="L-BFGS-B",
+             lower=0,
+             upper=effort_max)
+  
   effort_choice<-obj$par
-
-  e_harvest<-map_dbl(.x=w_grid,
-                  .f=~harvest_function(effort=effort_choice,
-                                       biomass=b,
-                                       quota=quota,
-                                       shock=.x))
   
-  esc<-map2_dbl(.x=e_harvest,.y=w_grid,~max((1+.y)*b-.x,biomass_min))
+  e_harvest<-harvest_function(effort=effort_choice,
+                             biomass=b,
+                             shock=w,
+                             quota=quota)
   
+  esc<-min(b*(1+w)-e_harvest,biomass_min)
+    
   
-  xnext<-map_dbl(esc,~growth(.x))
+  xnext<-growth(esc)
   
-  temp<-map_dbl(xnext,~spline(x=biomass_grid,y=V_now,xout=.x,method='natural')$y)
+  sp_store<-vector(mode="numeric",length=ncol(V_now))
+  
+  for(n in 1:ncol(V_now)){
+    
+    temp<-spline(x=biomass_grid,y=V_now[,n],xout=xnext,method="natural")
+    sp_store[n]<-temp$y
+    
+    
+  }
+ 
+  
+  Vfuture=beta*sum(sp_store*w_probs)
+  
   
   pay<-pay_vec
   
   pi<-e_harvest-c_cost*effort_choice^2+pay-premium
   
-  e_ut<-map_dbl(.x=pi,
-                .f=~utility(c=.x,gamma=gamma,boost=0,mod='cara'))*w_probs
+  e_ut<-utility(c=pi,gamma=gamma,boost=0,mod='cara')
   
   if(alpha==1){
     
-    return(-(sum(e_harvest*w_probs)+beta*sum(temp*w_probs)))
-  
-    } else if(alpha==0){
+    return(-(sum(e_harvest)+Vfuture))
     
-    return(-((1-alpha)*sum(e_ut)+beta*sum(temp*w_probs)))
-  
-    } else{
+  } else if(alpha==0){
+    
+    return(-((1-alpha)*sum(e_ut)+Vfuture))
+    
+  } else{
     
     scale=max_ut/max_harvest # Make sure we have a more equal comparison between harvest and ut
     
-    return(-(alpha*sum(e_harvest*w_probs)*scale+(1-alpha)*sum(e_ut)+beta*sum(temp*w_probs)))
+    return(-(alpha*sum(e_harvest)*scale+(1-alpha)*sum(e_ut)+Vfuture))
   }
   
   
@@ -230,10 +240,12 @@ objective_fcn<-function(choice,b,V_now,pay_vec,premium){
 
 
 DFall = data.frame()
-Vnext = vector(mode='numeric',length=n_biomass)
-V = rep(0,length.out=n_biomass)
-pol_converged=vector(mode='numeric',length=n_biomass) #Harvest Policy function
-polnow=vector(mode='numeric',length=n_biomass)
+# Initialize value function and policy functions
+V <- matrix(0, n_biomass, n_shocks)
+Vnext <- matrix(0, n_biomass, n_shocks)
+
+ #Harvest Policy function
+polnow=matrix(0, n_biomass, n_shocks)
 
 step=1
 error="False"
@@ -244,48 +256,46 @@ tol=0.01
 
 while(error=="False"){
   t=step
- 
-  #Loop over shocks space
   
-  for(i in 1:n_biomass){
-
-    b=biomass_grid[i]
-    guess=b/10
-
-    
-    #output = nloptr(x0=guess,eval_f=Payoff_pre,lb=0.0001,ub=1,opts=options,b=b,V=V,sim=sim,r=r,K=K,delta=delta,ra=a,ut_mod=ut_mod,xgrid=xgrid,p=p,c=c,cshape=cshape,trigger=trigger,premium=premium,gamma=gamma)
-    output = optim(par=guess,
-                   fn=objective_fcn,
-                   lower=0.00001,
-                   upper=b,
-                   b=b,
-                   V_now=V,
-                   pay_vec=pay,
-                   premium=premium,
-                   method='Brent') 
-    #output = optim(par=guess,fn=objective_fcn,lower=0.00001,upper=K,b=b,V_now=V,pay_vec=pay,premium=premium,method='L-BFGS-B')
-    fstar = output$par
-    Vstar = -output$val
-    Vnext[i]=Vstar
-    DFnow = data.frame(time=t,b=b,fstar=fstar,Vstar=Vstar)
-    DFall = bind_rows(DFall,DFnow)
-    polnow[i]=fstar
+  #Loop over shocks space
+  for(i_w in 1:n_shocks){
+    w=w_grid[i_w]
+    for(i in 1:n_biomass){
+      
+      b=biomass_grid[i]
+      guess=b/10
+      output = optim(par=guess,
+                     fn=objective_fcn_post,
+                     lower=0.00001,
+                     upper=b*(1+w),
+                     b=b,
+                     V_now=V,
+                     w=w,
+                     pay_vec=pay[i_w],
+                     premium=premium,
+                     method='Brent') 
+      fstar = output$par
+      Vstar = -output$val
+      Vnext[i,i_w]=Vstar
+      DFnow = data.frame(time=t,b=b,w=w,fstar=fstar,Vstar=Vstar)
+      DFall = bind_rows(DFall,DFnow)
+      polnow[i,i_w]=fstar
+    }
+  
   }
   
-  
-  #Check if errors reach tolerance for policy function convergence
   comp<-abs(polnow-pol_converged)
-  error_vec<-mean(comp)
-  
-  print(error_vec)
-  if(error_vec<tol & step>9){
+  error_vec<-colMeans(comp)
+  print(step)
+  #Check if errors reach tolerance for policy function convergence
+  if(sum(error_vec<tol)==length(error_vec) & step>10){
     error="True"
   }else{
     error="False"
   }
   
   step=step+1
-#browser()
+  #browser()
   V=Vnext
   pol_converged=polnow
   

@@ -1,26 +1,19 @@
-#### Weighted optimization VFI ####
 
-library(ggplot2)
-library(reshape2)
-library(gridExtra)
-library(fields)
-library(tidyverse)
 
-# ==============================================================================
-# 1. MODEL PARAMETERS
-# ==============================================================================
+
+
 
 set.seed(123)
 
 # Economic parameters
 beta <- 0.95           # Discount factor
-gamma <- 0.1          # Risk aversion (CRRA utility)
+gamma <- 0.5          # Risk aversion (CRRA utility)
 
 
 # Harvest and profit parameters
-q <- 0.2               # Catchability coefficient
+
 p <- 1                # Price per unit harvest
-c_cost <- 2.0          # Cost coefficient for effort (c*E^2)
+c_cost <- 15          # Cost coefficient for effort (c*E^2)
 
 
 # Biological parameters (logistic growth)
@@ -32,12 +25,12 @@ mu_w <- 0              # Mean shock (centered at zero)
 sigma_w <- 0.2         # Shock volatility
 
 # Insurance parameters
-trigger <- -0.11       # Shock trigger (payout when w < trigger)
-m<-0.2               # Premium as % of coverage (actuarially unfair)
+trigger <- -0.01       # Shock trigger (payout when w < trigger)
+m<-0               # Premium as % of coverage (actuarially unfair)
 
 # State space - keep moderate size for speed
 n_biomass <- 25        # Grid points for biomass
-n_shocks <- 11         # Number of shock realizations (use odd number for symmetry)
+n_shocks <- 13         # Number of shock realizations (use odd number for symmetry)
 
 # Biomass grid
 biomass_min <- K/100       # Minimum viable biomass
@@ -46,13 +39,11 @@ biomass_grid <- seq(biomass_min, biomass_max, length.out = n_biomass)
 
 # Choice bounds
 effort_max <- 5       # Maximum effort
-max_coverage <- q*effort_max*K    # Maximum insurance coverage
-cov_rate<-0.5
+max_coverage <- K    # Maximum insurance coverage
+
 # Iteration parameters
 max_iter <- 300
 tol <- 1e-4
-alpha=0 # Weight on harvest vs utility (1=harvest only, 0=utility only)
-
 
 # ==============================================================================
 # 2. UTILITY FUNCTION (CRRA)
@@ -109,6 +100,8 @@ w_probs <- shock_process$probs
 
 premium_rate<-sum(pmax(trigger - w_grid, 0) * w_probs) * (1 + m)
 
+pay<-0 # If we want to endogenize insurance choice into the quota decision or not
+
 # ==============================================================================
 # 4. BIOLOGICAL AND ECONOMIC FUNCTIONS
 # ==============================================================================
@@ -121,113 +114,63 @@ growth <- function(escapement) {
   return(max(growth, biomass_min))
 }
 
-# Harvest function: h = q * E * B * (1 + w)
-harvest_function <- function(effort, biomass, shock,quota) {
 
-  available_biomass <- biomass * (1 + shock)
-  available_biomass <- max(available_biomass, 0)
-  harvest <- q * effort * available_biomass
-  harvest<-min(harvest,quota)
-  return(harvest)
-}
-
-# Profit from harvest (before consumption and insurance)
-profit <- function(harvest, effort) {
-  revenue <- p * harvest
-  cost <- c_cost * effort^2
-  return(revenue - cost)
-}
-
-# Insurance payout
-insurance_payout <- function(shock, coverage) {
-  if (shock < trigger) {
-    gap <- (trigger - shock)
-    payout <- coverage * gap
-    return(payout)
-  } else {
-    return(0)
-  }
-}
 
 ## Insurance parameters ##
-pay<-map_dbl(.x=w_grid,
-             .f=~insurance_payout(shock=.x,
-                                  coverage=cov_rate*max_coverage))
 
-premium<-premium_rate*cov_rate*max_coverage
 
-# Max functions
-ut_max<-function(effort,biomass,quota,pay,premium){
- 
-  e_harvest<-map_dbl(.x=w_grid,
-                  .f=~harvest_function(effort=effort,
-                                       biomass=biomass,
-                                       quota=quota,
-                                       shock=.x))
+
+fisher_ut<-function(cov,b,q,prem_rate,shock,gamma,mod='cara'){
+
+  payout<-map_dbl(.x=w_grid,
+                       .f=~insurance_payout(shock=.x,
+                                            coverage=cov))
+  premium<-cov*prem_rate
   
+  pi<-map2_dbl(.x=shock,.y=payout,~q-c_cost*q/((1+.x)*b)+.y-premium)
   
-  pi<-e_harvest-c_cost*effort^2+pay-premium
-  
-  e_ut<-map_dbl(.x=pi,
-             .f=~utility(c=.x,gamma=gamma,boost=0,mod='cara'))*w_probs
+  e_ut<-map_dbl(pi,~utility(.x,gamma,boost=0,mod=mod))*w_probs
   
   return(-sum(e_ut))
 }
 
-objective_fcn<-function(choice,b,V_now,pay_vec,premium){
+payoff_fcn<-function(q,b,shock,V,pay,prem_rate,gamma,mod){
 
-  quota<-choice[1]
+
+  if(pay==0){
+    pi<-map_dbl(shock,~q-c_cost*q/((1+.x)*b))
+    
+    e_ut<-sum(map_dbl(pi,~utility(.x,gamma=gamma,boost=0,mod=mod))*w_probs)
+  } else{
+    fish_obj<-optim(par=b/10,
+                    fn=fisher_ut,
+                    b=b,
+                    q=q,
+                    prem_rate=prem_rate,
+                    shock=shock,
+                    gamma=gamma,
+                    mod=mod,
+                    method='Brent',
+                    lower=0,
+                    upper=max_coverage)
+    
+    e_ut=-fish_obj$value
+  }
   
-  obj<-optim(par=0.1,
-        fn=ut_max,
-        biomass=b,
-        quota=quota,
-        pay=pay_vec,
-        premium=premium,
-        method="L-BFGS-B",
-        lower=0,
-        upper=effort_max)
-
-  effort_choice<-obj$par
-
-  e_harvest<-map_dbl(.x=w_grid,
-                  .f=~harvest_function(effort=effort_choice,
-                                       biomass=b,
-                                       quota=quota,
-                                       shock=.x))
   
-  esc<-map2_dbl(.x=e_harvest,.y=w_grid,~max((1+.y)*b-.x,biomass_min))
+  
+  esc<-map2_dbl(.x=q,.y=w_grid,~max((1+.y)*b-.x,biomass_min))
   
   
   xnext<-map_dbl(esc,~growth(.x))
   
-  temp<-map_dbl(xnext,~spline(x=biomass_grid,y=V_now,xout=.x,method='natural')$y)
+  temp<-map_dbl(xnext,~spline(x=biomass_grid,y=V,xout=.x,method='natural')$y)
   
-  pay<-pay_vec
+  Vfuture=sum(temp*w_probs)
   
-  pi<-e_harvest-c_cost*effort_choice^2+pay-premium
-  
-  e_ut<-map_dbl(.x=pi,
-                .f=~utility(c=.x,gamma=gamma,boost=0,mod='cara'))*w_probs
-  
-  if(alpha==1){
-    
-    return(-(sum(e_harvest*w_probs)+beta*sum(temp*w_probs)))
-  
-    } else if(alpha==0){
-    
-    return(-((1-alpha)*sum(e_ut)+beta*sum(temp*w_probs)))
-  
-    } else{
-    
-    scale=max_ut/max_harvest # Make sure we have a more equal comparison between harvest and ut
-    
-    return(-(alpha*sum(e_harvest*w_probs)*scale+(1-alpha)*sum(e_ut)+beta*sum(temp*w_probs)))
-  }
-  
+  return(-(e_ut+beta*Vfuture))
   
 }
-
 
 DFall = data.frame()
 Vnext = vector(mode='numeric',length=n_biomass)
@@ -237,37 +180,55 @@ polnow=vector(mode='numeric',length=n_biomass)
 
 step=1
 error="False"
-tol=0.01
+tol=0.001
 
 #options=list("algorithm"="NLOPT_LN_COBYLA",xtol_rel=1e-06)
 
 
 while(error=="False"){
   t=step
- 
+  
   #Loop over shocks space
   
   for(i in 1:n_biomass){
-
+    
     b=biomass_grid[i]
     guess=b/10
-
     
-    #output = nloptr(x0=guess,eval_f=Payoff_pre,lb=0.0001,ub=1,opts=options,b=b,V=V,sim=sim,r=r,K=K,delta=delta,ra=a,ut_mod=ut_mod,xgrid=xgrid,p=p,c=c,cshape=cshape,trigger=trigger,premium=premium,gamma=gamma)
     output = optim(par=guess,
-                   fn=objective_fcn,
-                   lower=0.00001,
+                   fn=payoff_fcn,
+                   lower=0,
                    upper=b,
                    b=b,
-                   V_now=V,
-                   pay_vec=pay,
-                   premium=premium,
+                   shock=w_grid,
+                   V=V,
+                   gamma=gamma,
+                   mod=ut_mod,
+                   pay=pay,
+                   prem_rate=premium_rate,
                    method='Brent') 
-    #output = optim(par=guess,fn=objective_fcn,lower=0.00001,upper=K,b=b,V_now=V,pay_vec=pay,premium=premium,method='L-BFGS-B')
+    
+
+    ins_obj<-optim(par=b/10,
+                   fn=fisher_ut,
+                                 b=b,
+                                 q=output$par,
+                                 prem_rate=premium_rate,
+                                 shock=w_grid,
+                                 gamma=gamma,
+                                 mod=ut_mod,
+                                 method='Brent',
+                                 lower=0,
+                                 upper=max_coverage)
+    
+    cstar<-ins_obj$par
+    
+
+
     fstar = output$par
     Vstar = -output$val
     Vnext[i]=Vstar
-    DFnow = data.frame(time=t,b=b,fstar=fstar,Vstar=Vstar)
+    DFnow = data.frame(time=t,b=b,fstar=fstar,Vstar=Vstar,cstar=cstar)
     DFall = bind_rows(DFall,DFnow)
     polnow[i]=fstar
   }
@@ -285,7 +246,7 @@ while(error=="False"){
   }
   
   step=step+1
-#browser()
+  #browser()
   V=Vnext
   pol_converged=polnow
   
@@ -320,6 +281,11 @@ parameters<-data.frame(
   alpha=alpha
 )
 
-policy<-list(conv=conv,parameters=parameters)
 
-save(policy,file=here::here("data","vfi_pre_quota_noi_alpha1.Rdata"))
+## find fisher utility at each
+
+noi_ut<-map2_dbl(.x=conv$fstar,.y=conv$b,~fisher_ut(0,.y,.x,0,w_grid))
+
+i_ut<-map2(.x=conv$fstar,.y=conv$b,~optim(.y/10,fn=fisher_ut,b=.y,q=.x,prem_rate=premium_rate,shock=w_grid,method='Brent',lower=0,upper=max_coverage))
+see<-bind_rows(i_ut)
+
